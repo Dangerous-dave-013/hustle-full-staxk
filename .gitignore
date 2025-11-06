@@ -47,3 +47,6 @@ app.*.map.json
 .env
 .env.local
 .env.*.local
+
+# Backend folder (in separate repository)
+backend/
