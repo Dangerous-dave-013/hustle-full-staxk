@@ -24,6 +24,31 @@ jobs:
       with:
         flutter-version: '3.24.0'
         channel: 'stable'
+    
+    - name: Install Android SDK components
+      env:
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+      run: |
+        set -e
+        echo "Looking for sdkmanager..."
+        if [ -x "${ANDROID_SDK_ROOT:-/opt/android-sdk}/cmdline-tools/latest/bin/sdkmanager" ]; then
+          SDKMANAGER="${ANDROID_SDK_ROOT:-/opt/android-sdk}/cmdline-tools/latest/bin/sdkmanager"
+        elif [ -x "${ANDROID_SDK_ROOT:-/opt/android-sdk}/tools/bin/sdkmanager" ]; then
+          SDKMANAGER="${ANDROID_SDK_ROOT:-/opt/android-sdk}/tools/bin/sdkmanager"
+        else
+          # fallback to system path
+          SDKMANAGER="sdkmanager" || true
+        fi
+        echo "Using sdkmanager: $SDKMANAGER"
+        echo "Accepting licenses (may print many lines)"
+        yes | $SDKMANAGER --licenses || true
+        echo "Installing platform-tools, platforms;android-35 and build-tools;35.0.0"
+        $SDKMANAGER "platform-tools" "platforms;android-35" "build-tools;35.0.0" || true
+    
+    - name: Create .env file
+      run: |
+        echo "API_BASE_URL=https://hustle-backend-vmfa.onrender.com/api" > .env
+        echo "STRIPE_PUBLISHABLE_KEY=pk_test_placeholder" >> .env
         
     - name: Install dependencies
       run: flutter pub get
